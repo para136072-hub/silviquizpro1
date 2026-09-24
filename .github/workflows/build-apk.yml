@@ -17,21 +17,27 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Extract Android source
-        run: unzip -q SilviQuizPro_ANDROID_SOURCE.zip
+        run: |
+          unzip -q SilviQuizPro_ANDROID_SOURCE.zip
+          echo "Extracted folders:"
+          find . -maxdepth 2 -type f | head -50
 
       - name: Set up Java 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 16.0
 
       - name: Install Android SDK packages
         run: |
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          sdkmanager "platform-tools"
+          sdkmanager "platforms;android-35"
+          sdkmanager "build-tools;35.0.0"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -40,7 +46,8 @@ jobs:
 
       - name: Build debug APK
         working-directory: SilviQuizProAndroid
-        run: gradle --no-daemon clean assembleDebug --stacktrace
+        run: |
+          gradle --no-daemon clean assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
